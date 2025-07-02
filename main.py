@@ -48,6 +48,10 @@ def setup_langsmith_tracing(api_key, project_name, enabled=True):
 # Microsoft Learning MCP設定（固定）
 MICROSOFT_LEARNING_MCP_URL = "https://learn.microsoft.com/api/mcp"
 
+# モデル選択設定
+SUPPORTED_MODELS = ["gpt-4.1", "o3"]
+DEFAULT_MODEL_INDEX = 0  # デフォルトはgpt-4.1
+
 
 def create_mcp_client(mcp_url):
     """MCPクライアントを作成（HTTP形式）"""
@@ -58,7 +62,7 @@ def create_mcp_client(mcp_url):
     return MCPClient(transport)
 
 
-def create_agent(clients, messages=None):
+def create_agent(clients, model_id="gpt-4.1", messages=None):
     """複数のMCPクライアントからツールを集約してエージェントを作成。messagesで履歴も渡せる"""
     all_tools = []
     for client in clients:
@@ -69,11 +73,7 @@ def create_agent(clients, messages=None):
         client_args={
             "api_key": os.getenv("OPENAI_API_KEY"),
         },
-        model_id="gpt-4.1",
-        params={
-            "max_tokens": 1000,
-            "temperature": 0.5,
-        },
+        model_id=model_id,
     )
     if messages is not None:
         return Agent(model=model, tools=all_tools, messages=messages)
@@ -106,8 +106,6 @@ async def stream_response(agent, latest_user_input):
     full_response = ""
     shown_tools = set()
 
-    # 最新のユーザー入力をstream_asyncに渡す
-    print("Streaming response for user input:", latest_user_input)
     async for chunk in agent.stream_async(latest_user_input):
         if isinstance(chunk, dict):
             tool_id, tool_name = extract_tool_info(chunk)
@@ -134,6 +132,17 @@ async def stream_response(agent, latest_user_input):
 # LangSmithトレース設定（環境変数/シークレットから自動設定）
 if "langsmith" in st.secrets:
     setup_langsmith_tracing(st.secrets["langsmith"]["LANGSMITH_API_KEY"], "strands-mcp-agent", True)
+
+# サイドバーでモデル選択
+with st.sidebar:
+    st.header("⚙️ 設定")
+    selected_model = st.selectbox(
+        "使用するモデルを選択してください",
+        options=SUPPORTED_MODELS,
+        index=DEFAULT_MODEL_INDEX,
+        help="AIモデルを選択できます。o3は最新のモデルです。"
+    )
+    st.info(f"選択中のモデル: **{selected_model}**")
 
 # --- App ---
 st.title("Microsoft Learning Agent")
@@ -170,7 +179,7 @@ if prompt := st.chat_input("質問を入力してください"):
                         client.__enter__()
 
                     # 過去の履歴のみでAgentを作成
-                    agent = create_agent(clients, messages=st.session_state.messages.copy())
+                    agent = create_agent(clients, model_id=selected_model, messages=st.session_state.messages.copy())
 
                     # 最新のユーザー入力（str）をstream_responseに渡してレスポンスをストリーミング
                     response = asyncio.run(stream_response(agent, prompt))
