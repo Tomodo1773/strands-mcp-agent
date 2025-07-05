@@ -146,6 +146,13 @@ with st.sidebar:
         help="AIモデルを選択できます。o3は最新のモデルです。"
     )
     st.info(f"選択中のモデル: **{selected_model}**")
+    
+    # 会話履歴のクリア
+    st.markdown("---")
+    st.header("🔄 会話管理")
+    if st.button("🗑️ 会話をクリア", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
 # --- App ---
 st.title("Microsoft Learning Agent")
