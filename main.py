@@ -15,13 +15,15 @@ st.set_page_config(
     menu_items={"About": "Microsoft Learning MCPとStrands Agents SDKでAIエージェントを体験できるアプリだよ！"},
 )
 
-# 環境変数の設定
-if "openai" in st.secrets:
-    os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["OPENAI_API_KEY"]
+# 環境変数の設定（直接環境変数から取得）
+# 必須環境変数のチェック
+if not os.getenv("OPENAI_API_KEY"):
+    st.error("❌ **OPENAI_API_KEY** 環境変数が設定されていません。アプリケーションを実行する前に設定してください。")
+    st.stop()
 
-# LangSmithトレース設定
-if "langsmith" in st.secrets:
-    os.environ["LANGSMITH_API_KEY"] = st.secrets["langsmith"]["LANGSMITH_API_KEY"]
+# オプション環境変数のチェック
+if not os.getenv("LANGSMITH_API_KEY"):
+    st.info("ℹ️ **LANGSMITH_API_KEY** 環境変数が設定されていません。LangSmithトレースは無効になります。")
 
 
 def setup_langsmith_tracing(api_key, project_name, enabled=True):
@@ -129,9 +131,10 @@ async def stream_response(agent, latest_user_input):
     return full_response
 
 
-# LangSmithトレース設定（環境変数/シークレットから自動設定）
-if "langsmith" in st.secrets:
-    setup_langsmith_tracing(st.secrets["langsmith"]["LANGSMITH_API_KEY"], "strands-mcp-agent", True)
+# LangSmithトレース設定（環境変数から自動設定）
+langsmith_api_key = os.getenv("LANGSMITH_API_KEY")
+if langsmith_api_key:
+    setup_langsmith_tracing(langsmith_api_key, "strands-mcp-agent", True)
 
 # サイドバーでモデル選択
 with st.sidebar:
@@ -143,6 +146,13 @@ with st.sidebar:
         help="AIモデルを選択できます。o3は最新のモデルです。"
     )
     st.info(f"選択中のモデル: **{selected_model}**")
+    
+    # 会話履歴のクリア
+    st.markdown("---")
+    st.header("🔄 会話管理")
+    if st.button("🗑️ 会話をクリア", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
 # --- App ---
 st.title("Microsoft Learning Agent")
