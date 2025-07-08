@@ -1,0 +1,18 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Python: Streamlit (src/main.py)",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "streamlit", // Streamlitをモジュールとして起動
+			"args": ["run", "main.py"], // main.pyを実行
+			"console": "integratedTerminal",
+			"cwd": "${workspaceFolder}/src", // src ディレクトリをカレントディレクトリに設定
+			"envFile": "${workspaceFolder}/src/.env", // 環境変数は src/.env から取得
+			"env": {
+				"PYTHONPATH": "${workspaceFolder}/src"
+			}
+		}
+	]
+}
