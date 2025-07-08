@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 一般的なコマンド
 
 ### アプリケーションの実行
+
 ```bash
 # ローカルでStreamlitアプリを起動
 streamlit run main.py
@@ -18,18 +19,21 @@ streamlit run main.py --logger.level=debug
 ```
 
 ### 依存関係の管理
+
 ```bash
 # 依存関係のインストール（uvを使用）
 uv sync
 ```
 
 ### OpenAI API設定
+
 ```bash
 # 環境変数でOpenAI API キーを設定
 export OPENAI_API_KEY="your-openai-api-key"
 ```
 
 ### LangSmithトレース設定
+
 ```bash
 # 環境変数でLangSmith設定（オプション）
 export LANGSMITH_API_KEY="your-langsmith-api-key"
@@ -38,6 +42,7 @@ export LANGSMITH_API_KEY="your-langsmith-api-key"
 ## コードアーキテクチャと構造
 
 ### ファイル構成
+
 - `main.py` - Streamlitアプリケーションのメインファイル
 - `pyproject.toml` - Python依存関係の定義（uv管理）
 - `uv.lock` - 依存関係のロックファイル
@@ -46,6 +51,7 @@ export LANGSMITH_API_KEY="your-langsmith-api-key"
 ### 主要なコンポーネント
 
 #### 1. Streamlitアプリケーション (`main.py`)
+
 - **UI構成**:
   - メインエリア: 質問入力フィールドと回答表示
   - Microsoft Learning MCP固定設定
@@ -59,6 +65,7 @@ export LANGSMITH_API_KEY="your-langsmith-api-key"
   - `setup_langsmith_tracing()`: LangSmithトレース設定
 
 #### 2. 技術スタック
+
 - **フレームワーク**: Streamlit（Webインターフェース）
 - **AIエージェント**: Strands Agents SDK（OTEL対応）
 - **LLMプロバイダー**: OpenAI（GPT-4.1モデル）
@@ -67,14 +74,17 @@ export LANGSMITH_API_KEY="your-langsmith-api-key"
 - **トレーシング**: OpenTelemetry → LangSmith
 
 #### 3. セッション管理
+
 - Microsoft Learning MCPサーバーに固定接続
 - シンプルな質問・回答インターフェース
 
 #### 4. 認証とシークレット管理
+
 - 環境変数で直接設定
   - OPENAI_API_KEY: OpenAI API認証（必須）
   - LANGSMITH_API_KEY: LangSmithトレース（オプション）
 - 設定例:
+
   ```bash
   export OPENAI_API_KEY="your-openai-api-key"
   export LANGSMITH_API_KEY="your-langsmith-api-key"
@@ -91,6 +101,7 @@ export LANGSMITH_API_KEY="your-langsmith-api-key"
 ## GitHub Actions
 
 Claude Code Actionが設定されており、以下のトリガーで動作:
+
 - Issue/PRコメントに`@claude`を含む場合
 - Issue本文/タイトルに`@claude`を含む場合
 
